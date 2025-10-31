@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BillionTribe - Login & Register</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+        
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
+        }
+        
+        .red-gradient {
+            background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+        }
+        
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .form-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .animate-slide-in {
+            animation: slideIn 0.5s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .input-field {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            transition: all 0.3s ease;
+            color: white;
+        }
+        
+        .input-field:focus {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: #dc2626;
+            outline: none;
+        }
+        
+        .input-field::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+        
+        select.input-field {
+            background: rgba(255, 255, 255, 0.08);
+            color: white;
+            appearance: none;
+            cursor: pointer;
+        }
+        
+        select.input-field option {
+            background: #1a1a1a;
+            color: white;
+            padding: 10px;
+        }
+        
+        .select-wrapper {
+            position: relative;
+        }
+        
+        .select-wrapper::after {
+            content: '▼';
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            pointer-events: none;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 12px;
+        }
+        
+        .tab-active {
+            background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+        }
+        
+        .password-toggle {
+            cursor: pointer;
+        }
+        
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal.active {
+            display: flex;
+            animation: fadeIn 0.3s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+        
+        .modal-content {
+            animation: scaleIn 0.3s ease-out;
+        }
+        
+        @keyframes scaleIn {
+            from {
+                transform: scale(0.9);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+        
+        .spinner {
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-top: 3px solid #dc2626;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .flag-icon {
+            display: inline-block;
+            width: 20px;
+            height: 15px;
+            margin-right: 8px;
+        }
+    </style>
+</head>
+<body class="gradient-bg text-white">
+    <!-- Success Modal -->
+    <div id="successModal" class="modal">
+        <div class="modal-content glass-effect rounded-2xl p-8 max-w-md mx-4 text-center">
+            <div class="mb-6">
+                <div class="spinner mx-auto mb-4"></div>
+                <h3 class="text-2xl font-bold mb-2" id="modalTitle">Success!</h3>
+                <p class="text-gray-300" id="modalMessage">Redirecting to dashboard...</p>
+            </div>
+            <div class="w-full bg-gray-700 rounded-full h-2">
+                <div id="progressBar" class="red-gradient h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-container">
+        <div class="w-full max-w-md">
+            <!-- Logo -->
+            <div class="text-center mb-8 animate-slide-in">
+                <div class="inline-flex items-center space-x-3 mb-4">
+                    <div class="w-16 h-16 bg-white rounded-2xl flex items-center justify-center">
+                        <span class="text-red-600 font-bold text-2xl">BT</span>
+                    </div>
+                    <span class="text-3xl font-bold">BillionTribe</span>
+                </div>
+                <p class="text-gray-400">Your Trusted Crypto Partner</p>
+            </div>
+
+            <!-- Tab Buttons -->
+            <div class="glass-effect rounded-2xl p-2 mb-6 flex animate-slide-in">
+                <button id="loginTab" class="tab-active flex-1 py-3 rounded-xl font-semibold transition">
+                    Login
+                </button>
+                <button id="registerTab" class="flex-1 py-3 rounded-xl font-semibold transition hover:bg-white hover:bg-opacity-5">
+                    Register
+                </button>
+            </div>
+
+            <!-- Login Form -->
+            <div id="loginForm" class="glass-effect rounded-2xl p-6 sm:p-8 animate-slide-in">
+                <h2 class="text-2xl font-bold mb-6">Welcome Back!</h2>
+                
+                <form class="space-y-4" onsubmit="handleLogin(event)">
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Email Address</label>
+                        <input 
+                            type="email" 
+                            placeholder="example@email.com"
+                            class="w-full px-4 py-3 rounded-lg input-field"
+                            required
+                        >
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Password</label>
+                        <div class="relative">
+                            <input 
+                                type="password" 
+                                id="loginPassword"
+                                placeholder="Enter your password"
+                                class="w-full px-4 py-3 rounded-lg input-field pr-12"
+                                required
+                            >
+                            <span class="absolute right-4 top-1/2 transform -translate-y-1/2 password-toggle" onclick="togglePassword('loginPassword', 'loginEye')">
+                                <svg id="loginEye" class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                </svg>
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-between text-sm">
+                        <label class="flex items-center space-x-2">
+                            <input type="checkbox" class="w-4 h-4 rounded">
+                            <span>Remember me</span>
+                        </label>
+                        <a href="#" class="text-red-500 hover:text-red-400">Forgot Password?</a>
+                    </div>
+
+                    <button type="submit" class="w-full red-gradient py-3 rounded-lg font-semibold hover:opacity-90 transition">
+                        Login
+                    </button>
+
+                    <div class="relative my-6">
+                        <div class="absolute inset-0 flex items-center">
+                            <div class="w-full border-t border-gray-700"></div>
+                        </div>
+                        <div class="relative flex justify-center text-sm">
+                            <span class="px-2 bg-transparent text-gray-400">Or continue with</span>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Register Form -->
+            <div id="registerForm" class="glass-effect rounded-2xl p-6 sm:p-8 animate-slide-in hidden">
+                <h2 class="text-2xl font-bold mb-6">Create Account</h2>
+                
+                <form class="space-y-4" onsubmit="handleRegister(event)">
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Email Address</label>
+                        <input 
+                            type="email" 
+                            placeholder="example@email.com"
+                            class="w-full px-4 py-3 rounded-lg input-field"
+                            required
+                        >
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Phone Number</label>
+                        <input 
+                            type="tel" 
+                            placeholder="+234 810 566 8058"
+                            class="w-full px-4 py-3 rounded-lg input-field"
+                            required
+                        >
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Country</label>
+                        <div class="select-wrapper">
+                            <select class="w-full px-4 py-3 rounded-lg input-field" required>
+                                <option value="" disabled selected>Select your country</option>
+                                <option value="NG">🇳🇬 Nigeria</option>
+                                <option value="US">🇺🇸 United States</option>
+                                <option value="GB">🇬🇧 United Kingdom</option>
+                                <option value="CA">🇨🇦 Canada</option>
+                                <option value="GH">🇬🇭 Ghana</option>
+                                <option value="KE">🇰🇪 Kenya</option>
+                                <option value="ZA">🇿🇦 South Africa</option>
+                                <option value="IN">🇮🇳 India</option>
+                                <option value="SG">🇸🇬 Singapore</option>
+                                <option value="AE">🇦🇪 United Arab Emirates</option>
+                                <option value="AU">🇦🇺 Australia</option>
+                                <option value="DE">🇩🇪 Germany</option>
+                                <option value="FR">🇫🇷 France</option>
+                                <option value="JP">🇯🇵 Japan</option>
+                                <option value="BR">🇧🇷 Brazil</option>
+                                <option value="MX">🇲🇽 Mexico</option>
+                                <option value="ES">🇪🇸 Spain</option>
+                                <option value="IT">🇮🇹 Italy</option>
+                                <option value="NL">🇳🇱 Netherlands</option>
+                                <option value="CH">🇨🇭 Switzerland</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Default Currency</label>
+                        <div class="select-wrapper">
+                            <select class="w-full px-4 py-3 rounded-lg input-field" required>
+                                <option value="" disabled selected>Select your currency</option>
+                                <option value="NGN">🇳🇬 NGN - Nigerian Naira</option>
+                                <option value="USD">🇺🇸 USD - US Dollar</option>
+                                <option value="EUR">🇪🇺 EUR - Euro</option>
+                                <option value="GBP">🇬🇧 GBP - British Pound</option>
+                                <option value="CAD">🇨🇦 CAD - Canadian Dollar</option>
+                                <option value="AUD">🇦🇺 AUD - Australian Dollar</option>
+                                <option value="JPY">🇯🇵 JPY - Japanese Yen</option>
+                                <option value="CNY">🇨🇳 CNY - Chinese Yuan</option>
+                                <option value="INR">🇮🇳 INR - Indian Rupee</option>
+                                <option value="AED">🇦🇪 AED - UAE Dirham</option>
+                                <option value="ZAR">🇿🇦 ZAR - South African Rand</option>
+                                <option value="BRL">🇧🇷 BRL - Brazilian Real</option>
+                                <option value="MXN">🇲🇽 MXN - Mexican Peso</option>
+                                <option value="CHF">🇨🇭 CHF - Swiss Franc</option>
+                                <option value="SGD">🇸🇬 SGD - Singapore Dollar</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Password</label>
+                        <div class="relative">
+                            <input 
+                                type="password" 
+                                id="registerPassword"
+                                placeholder="Create a strong password"
+                                class="w-full px-4 py-3 rounded-lg input-field pr-12"
+                                required
+                            >
+                            <span class="absolute right-4 top-1/2 transform -translate-y-1/2 password-toggle" onclick="togglePassword('registerPassword', 'registerEye')">
+                                <svg id="registerEye" class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                </svg>
+                            </span>
+                        </div>
+                        <p class="text-xs text-gray-400 mt-1">Must be at least 8 characters with uppercase, lowercase, and numbers</p>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Confirm Password</label>
+                        <div class="relative">
+                            <input 
+                                type="password" 
+                                id="confirmPassword"
+                                placeholder="Re-enter your password"
+                                class="w-full px-4 py-3 rounded-lg input-field pr-12"
+                                required
+                            >
+                            <span class="absolute right-4 top-1/2 transform -translate-y-1/2 password-toggle" onclick="togglePassword('confirmPassword', 'confirmEye')">
+                                <svg id="confirmEye" class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                </svg>
+                            </span>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Referral Code (Optional)</label>
+                        <input 
+                            type="text" 
+                            placeholder="Enter referral code if you have one"
+                            class="w-full px-4 py-3 rounded-lg input-field"
+                        >
+                    </div>
+
+                    <div class="flex items-start space-x-2">
+                        <input type="checkbox" class="w-4 h-4 mt-1 rounded" required>
+                        <label class="text-sm text-gray-300">
+                            I agree to the <a href="#" class="text-red-500 hover:text-red-400">Terms of Service</a> and <a href="#" class="text-red-500 hover:text-red-400">Privacy Policy</a>
+                        </label>
+                    </div>
+
+                    <button type="submit" class="w-full red-gradient py-3 rounded-lg font-semibold hover:opacity-90 transition">
+                        Create Account
+                    </button>
+
+                    <div class="relative my-6">
+                        <div class="absolute inset-0 flex items-center">
+                            <div class="w-full border-t border-gray-700"></div>
+                        </div>
+                        <div class="relative flex justify-center text-sm">
+                            <span class="px-2 bg-transparent text-gray-400">Or sign up with</span>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Back to Home -->
+            <div class="text-center mt-6">
+                <a href="index.html" class="text-gray-400 hover:text-red-500 transition flex items-center justify-center space-x-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                    </svg>
+                  
+                    <span>Back to Home</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Tab switching
+        const loginTab = document.getElementById('loginTab');
+        const registerTab = document.getElementById('registerTab');
+        const loginForm = document.getElementById('loginForm');
+        const registerForm = document.getElementById('registerForm');
+
+        loginTab.addEventListener('click', () => {
+            loginTab.classList.add('tab-active');
+            registerTab.classList.remove('tab-active');
+            loginForm.classList.remove('hidden');
+            registerForm.classList.add('hidden');
+        });
+
+        registerTab.addEventListener('click', () => {
+            registerTab.classList.add('tab-active');
+            loginTab.classList.remove('tab-active');
+            registerForm.classList.remove('hidden');
+            loginForm.classList.add('hidden');
+        });
+
+        // Toggle password visibility
+        function togglePassword(inputId, eyeId) {
+            const input = document.getElementById(inputId);
+            const eye = document.getElementById(eyeId);
+            
+            if (input.type === 'password') {
+                input.type = 'text';
+                eye.innerHTML = `
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path>
+                `;
+            } else {
+                input.type = 'password';
+                eye.innerHTML = `
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                `;
+            }
+        }
+
+        // Show success modal with progress bar
+        function showSuccessModal(title, message) {
+            const modal = document.getElementById('successModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalMessage = document.getElementById('modalMessage');
+            const progressBar = document.getElementById('progressBar');
+            
+            modalTitle.textContent = title;
+            modalMessage.textContent = message;
+            modal.classList.add('active');
+            
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += 2;
+                progressBar.style.width = progress + '%';
+                
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    setTimeout(() => {
+                        modal.classList.remove('active');
+                        // Redirect to dashboard or home
+                        window.location.href = '#dashboard';
+                    }, 500);
+                }
+            }, 30);
+        }
+
+        // Handle login form submission
+        function handleLogin(event) {
+            event.preventDefault();
+            showSuccessModal('Login Successful!', 'Redirecting to your dashboard...');
+        }
+
+        // Handle register form submission
+        function handleRegister(event) {
+            event.preventDefault();
+            
+            const password = document.getElementById('registerPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            if (password !== confirmPassword) {
+                showErrorModal('Passwords do not match!');
+                return;
+            }
+            
+            if (password.length < 8) {
+                showErrorModal('Password must be at least 8 characters long!');
+                return;
+            }
+            
+            const hasUpperCase = /[A-Z]/.test(password);
+            const hasLowerCase = /[a-z]/.test(password);
+            const hasNumber = /[0-9]/.test(password);
+            
+            if (!hasUpperCase || !hasLowerCase || !hasNumber) {
+                showErrorModal('Password must contain uppercase, lowercase, and numbers!');
+                return;
+            }
+            
+            showSuccessModal('Registration Successful!', 'Welcome to BillionTribe! Redirecting to dashboard...');
+        }
+
+        // Show error modal
+        function showErrorModal(message) {
+            const modal = document.getElementById('successModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalMessage = document.getElementById('modalMessage');
+            const progressBar = document.getElementById('progressBar');
+            const spinner = modal.querySelector('.spinner');
+            
+            modalTitle.textContent = 'Error!';
+            modalMessage.textContent = message;
+            spinner.style.display = 'none';
+            progressBar.style.display = 'none';
+            modal.classList.add('active');
+            
+            setTimeout(() => {
+                modal.classList.remove('active');
+                spinner.style.display = 'block';
+                progressBar.style.display = 'block';
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
